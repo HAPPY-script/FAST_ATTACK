@@ -1,3 +1,10 @@
+game.StarterGui:SetCore("SendNotification", {
+    Title = "⚡FAST ATTACK👊";
+    Text = "Fast attack will automatically turn on when you play Blox Fruit.";
+    Duration = 5;
+    Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
+})
+
 while true do
     wait(0.001) -- Lặp lại mỗi 0.01s
 
