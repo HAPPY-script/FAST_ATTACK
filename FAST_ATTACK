@@ -1,0 +1,18 @@
+while true do
+    wait(0.001) -- Lặp lại mỗi 0.01s
+
+    -- Lấy tất cả người chơi trong game
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        -- Kiểm tra xem nhân vật của người chơi có tồn tại không
+        if player.Character and player.Character:FindFirstChild("Head") then
+            local args = {
+                [1] = player.Character.Head,  -- Lấy phần đầu của người chơi
+                [2] = {},
+                [4] = "326880d6"
+            }
+
+            -- Gọi sự kiện FireServer để gửi yêu cầu
+            game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
+        end
+    end
+end
