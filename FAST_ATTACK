@@ -5,8 +5,9 @@ game.StarterGui:SetCore("SendNotification", {
     Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
 })
 
+--player
 while true do
-    wait(0.001) -- Lặp lại mỗi 0.01s
+    wait(0.001) -- Lặp lại mỗi 0.001s
 
     -- Lấy tất cả người chơi trong game
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
@@ -21,5 +22,41 @@ while true do
             -- Gọi sự kiện FireServer để gửi yêu cầu
             game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
         end
+    end
+end
+
+--npc
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EnemiesFolder = workspace:WaitForChild("Enemies")
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+
+-- Tìm zombie gần nhất
+local function getClosestEnemy()
+    local closestEnemy = nil
+    local shortestDistance = math.huge
+    local player = game.Players.LocalPlayer
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+    if hrp then
+        for _, enemy in pairs(EnemiesFolder:GetChildren()) do
+            local part = enemy:FindFirstChild("UpperTorso")
+            if part then
+                local dist = (part.Position - hrp.Position).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closestEnemy = part
+                end
+            end
+        end
+    end
+
+    return closestEnemy
+end
+
+-- Auto tấn công cực nhanh
+while task.wait(0.001) do
+    local targetPart = getClosestEnemy()
+    if targetPart then
+        Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8")
     end
 end
