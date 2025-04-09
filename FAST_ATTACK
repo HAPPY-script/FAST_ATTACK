@@ -1,41 +1,40 @@
-game.StarterGui:SetCore("SendNotification", {
-    Title = "⚡FAST ATTACK👊";
-    Text = "Fast attack will automatically turn on when you play Blox Fruit.";
-    Duration = 5;
-    Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
-})
+-- Gửi thông báo khi vào game
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "⚡FAST ATTACK👊";
+        Text = "Fast attack will automatically turn on when you play Blox Fruit.";
+        Duration = 5;
+        Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
+    })
+end)
 
---player
-while true do
-    wait(0.001) -- Lặp lại mỗi 0.001s
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local EnemiesFolder = workspace:WaitForChild("Enemies")
+local LocalPlayer = Players.LocalPlayer
 
-    -- Lấy tất cả người chơi trong game
-    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-        -- Kiểm tra xem nhân vật của người chơi có tồn tại không
-        if player.Character and player.Character:FindFirstChild("Head") then
-            local args = {
-                [1] = player.Character.Head,  -- Lấy phần đầu của người chơi
-                [2] = {},
-                [4] = "326880d6"
-            }
-
-            -- Gọi sự kiện FireServer để gửi yêu cầu
-            game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
+-- Tấn công tất cả người chơi liên tục
+task.spawn(function()
+    while task.wait(0.001) do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                local args = {
+                    [1] = player.Character.Head,
+                    [2] = {},
+                    [4] = "326880d6" -- Token cho người chơi
+                }
+                Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
+            end
         end
     end
-end
-
---npc
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local EnemiesFolder = workspace:WaitForChild("Enemies")
-local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+end)
 
 -- Tìm zombie gần nhất
 local function getClosestEnemy()
     local closestEnemy = nil
     local shortestDistance = math.huge
-    local player = game.Players.LocalPlayer
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
     if hrp then
         for _, enemy in pairs(EnemiesFolder:GetChildren()) do
@@ -53,10 +52,12 @@ local function getClosestEnemy()
     return closestEnemy
 end
 
--- Auto tấn công cực nhanh
-while task.wait(0.001) do
-    local targetPart = getClosestEnemy()
-    if targetPart then
-        Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8")
+-- Tấn công zombie gần nhất cực nhanh
+task.spawn(function()
+    while task.wait(0.001) do
+        local targetPart = getClosestEnemy()
+        if targetPart then
+            Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8") -- Token cho NPC
+        end
     end
-end
+end)
