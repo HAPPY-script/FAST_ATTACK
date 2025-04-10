@@ -1,3 +1,9 @@
+if _G.FastAttack then
+    warn("Script đã chạy! Không thể chạy lại.")
+    return
+end
+_G.FastAttack = true
+
 -- Gửi thông báo khi vào game
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
