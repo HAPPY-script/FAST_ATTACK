@@ -56,3 +56,59 @@ task.spawn(function()
         end
     end
 end)
+
+wait(1)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local EnemiesFolder = workspace:WaitForChild("Enemies")
+local LocalPlayer = Players.LocalPlayer
+
+-- Tấn công tất cả người chơi liên tục
+task.spawn(function()
+    while task.wait(0.001) do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                local args = {
+                    [1] = player.Character.Head,
+                    [2] = {},
+                    [4] = "326880d6" -- Token cho người chơi
+                }
+                Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
+            end
+        end
+    end
+end)
+
+-- Tìm zombie gần nhất
+local function getClosestEnemy()
+    local closestEnemy = nil
+    local shortestDistance = math.huge
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+    if hrp then
+        for _, enemy in pairs(EnemiesFolder:GetChildren()) do
+            local part = enemy:FindFirstChild("UpperTorso")
+            if part then
+                local dist = (part.Position - hrp.Position).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closestEnemy = part
+                end
+            end
+        end
+    end
+
+    return closestEnemy
+end
+
+-- Tấn công zombie gần nhất cực nhanh
+task.spawn(function()
+    while task.wait(0.001) do
+        local targetPart = getClosestEnemy()
+        if targetPart then
+            Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8") -- Token cho NPC
+        end
+    end
+end)
