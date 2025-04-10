@@ -38,7 +38,7 @@ end
 
 -- Ưu tiên tấn công zombie, nếu không có thì mới đánh player
 task.spawn(function()
-    while task.wait(0.001) do
+    while task.wait(0.1) do
         local targetPart = getClosestEnemy()
         if targetPart then
             Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8")
@@ -67,7 +67,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- Tấn công tất cả người chơi liên tục
 task.spawn(function()
-    while task.wait(0.001) do
+    while task.wait(0.1) do
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
                 local args = {
@@ -105,7 +105,7 @@ end
 
 -- Tấn công zombie gần nhất cực nhanh
 task.spawn(function()
-    while task.wait(0.001) do
+    while task.wait(0.1) do
         local targetPart = getClosestEnemy()
         if targetPart then
             Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8") -- Token cho NPC
