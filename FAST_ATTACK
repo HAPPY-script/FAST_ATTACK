@@ -1,10 +1,10 @@
 -- Gửi thông báo khi vào game
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
-        Title = "⚡FAST ATTACK👊",
-        Text = "Fast attack will automatically turn on when you play Blox Fruit.",
-        Duration = 5,
-        Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150",
+        Title = "⚡FAST ATTACK👊";
+        Text = "Fast attack will automatically turn on when you play Blox Fruit.";
+        Duration = 5;
+        Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
     })
 end)
 
@@ -14,29 +14,39 @@ local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
 local EnemiesFolder = workspace:WaitForChild("Enemies")
 local LocalPlayer = Players.LocalPlayer
 
--- Tấn công tất cả quái xung quanh
+-- Tìm tất cả zombie còn sống
+local function getAllEnemies()
+    local enemies = {}
+    for _, enemy in pairs(EnemiesFolder:GetChildren()) do
+        local part = enemy:FindFirstChild("UpperTorso")
+        if part and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            table.insert(enemies, part)
+        end
+    end
+    return enemies
+end
+
+-- Tấn công tất cả quái
 task.spawn(function()
     while task.wait(0.001) do
-        local foundEnemy = false
-        for _, enemy in pairs(EnemiesFolder:GetChildren()) do
-            local part = enemy:FindFirstChild("UpperTorso")
-            if part and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                Net:WaitForChild("RE/RegisterHit"):FireServer(part, {}, "3269aee8") -- Token cho NPC
-                foundEnemy = true
-            end
+        local enemyParts = getAllEnemies()
+        for _, part in pairs(enemyParts) do
+            Net:WaitForChild("RE/RegisterHit"):FireServer(part, {}, "3269aee8") -- Token cho NPC
         end
+    end
+end)
 
-        -- Nếu không có quái nào thì mới đánh người chơi
-        if not foundEnemy then
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                    local args = {
-                        [1] = player.Character.Head,
-                        [2] = {},
-                        [4] = "326880d6" -- Token cho người chơi
-                    }
-                    Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
-                end
+-- Tấn công tất cả người chơi liên tục (ngoại trừ bản thân)
+task.spawn(function()
+    while task.wait(0.001) do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                local args = {
+                    [1] = player.Character.Head,
+                    [2] = {},
+                    [4] = "326880d6" -- Token cho người chơi
+                }
+                Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
             end
         end
     end
