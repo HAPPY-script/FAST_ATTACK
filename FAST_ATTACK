@@ -1,10 +1,10 @@
 -- Gửi thông báo khi vào game
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
-        Title = "⚡FAST ATTACK👊";
-        Text = "Fast attack will automatically turn on when you play Blox Fruit.";
-        Duration = 5;
-        Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150";
+        Title = "⚡FAST ATTACK👊",
+        Text = "Fast attack will automatically turn on when you play Blox Fruit.",
+        Duration = 5,
+        Icon = "rbxthumb://type=Asset&id=91623223092520&w=150&h=150",
     })
 end)
 
@@ -14,50 +14,30 @@ local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
 local EnemiesFolder = workspace:WaitForChild("Enemies")
 local LocalPlayer = Players.LocalPlayer
 
--- Tấn công tất cả người chơi liên tục
+-- Tấn công tất cả quái xung quanh
 task.spawn(function()
     while task.wait(0.001) do
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                local args = {
-                    [1] = player.Character.Head,
-                    [2] = {},
-                    [4] = "326880d6" -- Token cho người chơi
-                }
-                Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
-            end
-        end
-    end
-end)
-
--- Tìm zombie gần nhất
-local function getClosestEnemy()
-    local closestEnemy = nil
-    local shortestDistance = math.huge
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-    if hrp then
+        local foundEnemy = false
         for _, enemy in pairs(EnemiesFolder:GetChildren()) do
             local part = enemy:FindFirstChild("UpperTorso")
-            if part then
-                local dist = (part.Position - hrp.Position).Magnitude
-                if dist < shortestDistance then
-                    shortestDistance = dist
-                    closestEnemy = part
-                end
+            if part and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                Net:WaitForChild("RE/RegisterHit"):FireServer(part, {}, "3269aee8") -- Token cho NPC
+                foundEnemy = true
             end
         end
-    end
 
-    return closestEnemy
-end
-
--- Tấn công zombie gần nhất cực nhanh
-task.spawn(function()
-    while task.wait(0.001) do
-        local targetPart = getClosestEnemy()
-        if targetPart then
-            Net:WaitForChild("RE/RegisterHit"):FireServer(targetPart, {}, "3269aee8") -- Token cho NPC
+        -- Nếu không có quái nào thì mới đánh người chơi
+        if not foundEnemy then
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                    local args = {
+                        [1] = player.Character.Head,
+                        [2] = {},
+                        [4] = "326880d6" -- Token cho người chơi
+                    }
+                    Net:WaitForChild("RE/RegisterHit"):FireServer(unpack(args))
+                end
+            end
         end
     end
 end)
